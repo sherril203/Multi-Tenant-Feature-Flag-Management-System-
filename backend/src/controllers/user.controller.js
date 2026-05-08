@@ -59,7 +59,7 @@ const UserLogin = async (req, res) => {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    const token = await tokengenerator(existData)
+    const token = await tokengenerator(user)
     return res.status(200).json({
       message: "Login successful",
       token,

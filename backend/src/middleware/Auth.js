@@ -4,7 +4,9 @@ require("dotenv").config();
 const jwt_secret = process.env.JWT_SECRET;
 
 const tokengenerator = (user) => {
-  const token = jwt.sign(
+  if (!user) throw new Error("User data required for token");
+
+  return jwt.sign(
     {
       id: user._id,
       role: user.role,
@@ -13,8 +15,5 @@ const tokengenerator = (user) => {
     jwt_secret,
     { expiresIn: "1h" }
   );
-
-  return token;
 };
-
 module.exports = tokengenerator;

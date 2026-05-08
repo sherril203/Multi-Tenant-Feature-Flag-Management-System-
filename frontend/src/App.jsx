@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
-import Home from './components/Home'
+import Router from './routers/Router'
 
 
 function App() {
   return(
     <>
-    <Home/>
+    <Router/>
     </>
   )
 }

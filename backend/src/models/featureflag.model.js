@@ -1,8 +1,17 @@
 const mongoose = require("mongoose");
+
 const featureSchema = new mongoose.Schema({
-  key: String,
-  enabled: Boolean,
-  orgId: { type: mongoose.Schema.Types.ObjectId, ref: "Organization" }
+  key: { type: String, required: true },
+  enabled: { type: Boolean, default: false },
+  orgId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Organization",
+    required: true
+  }
 });
-const featureModel=mongoose.model("FeatureFlag", featureSchema);
-module.exports = featureModel
+
+featureSchema.index({ key: 1, orgId: 1 }, { unique: true });
+
+const featureModel = mongoose.model("FeatureFlag", featureSchema);
+
+module.exports = featureModel;
