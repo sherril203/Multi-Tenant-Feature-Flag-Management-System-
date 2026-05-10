@@ -1,19 +1,24 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const jwt_secret = process.env.JWT_SECRET;
+const auth = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
 
-const tokengenerator = (user) => {
-  if (!user) throw new Error("User data required for token");
+    if (!authHeader) {
+      return res.status(401).json({ message: "No token provided" });
+    }
 
-  return jwt.sign(
-    {
-      id: user._id,
-      role: user.role,
-      orgId: user.orgId
-    },
-    jwt_secret,
-    { expiresIn: "1h" }
-  );
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = decoded; // 🔥 THIS FIXES EVERYTHING
+
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
 };
-module.exports = tokengenerator;
+
+module.exports = auth;

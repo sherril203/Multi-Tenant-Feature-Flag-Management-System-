@@ -1,9 +1,10 @@
 const FeatureModel = require("../models/featureflag.model");
 
+// ✅ CREATE FEATURE
 const createFeature = async (req, res) => {
   try {
     const { key, enabled } = req.body;
-    const orgId = req.user.orgId; 
+    const orgId = req.user.orgId;
 
     if (!key) {
       return res.status(400).json({ message: "Feature key required" });
@@ -16,7 +17,7 @@ const createFeature = async (req, res) => {
 
     const feature = new FeatureModel({
       key,
-      enabled,
+      enabled: enabled ?? false, // ✅ fix
       orgId
     });
 
@@ -25,14 +26,22 @@ const createFeature = async (req, res) => {
     res.status(201).json({ message: "Feature created", feature });
 
   } catch (err) {
+    // ✅ handle duplicate index error
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "Feature already exists (unique)" });
+    }
+
     res.status(500).json({ message: "Create failed", error: err.message });
   }
 };
+
+
+// ✅ GET FEATURES
 const getFeatures = async (req, res) => {
   try {
     const orgId = req.user.orgId;
 
-    const features = await FeatureModel.find({ orgId });
+    const features = await FeatureModel.find({ orgId }).lean(); // ✅ optimized
 
     res.status(200).json(features);
 
@@ -40,11 +49,19 @@ const getFeatures = async (req, res) => {
     res.status(500).json({ message: "Fetch failed", error: err.message });
   }
 };
+
+
+// ✅ UPDATE FEATURE
 const updateFeature = async (req, res) => {
   try {
     const { id } = req.params;
     const { enabled } = req.body;
     const orgId = req.user.orgId;
+
+    // ✅ validation
+    if (typeof enabled !== "boolean") {
+      return res.status(400).json({ message: "Enabled must be boolean" });
+    }
 
     const feature = await FeatureModel.findOne({ _id: id, orgId });
 
@@ -62,10 +79,17 @@ const updateFeature = async (req, res) => {
     res.status(500).json({ message: "Update failed", error: err.message });
   }
 };
+
+
+// ✅ CHECK FEATURE (IMPROVED)
 const checkFeature = async (req, res) => {
   try {
-    const { key } = req.body;
+    const { key } = req.query; // ✅ changed from body
     const orgId = req.user.orgId;
+
+    if (!key) {
+      return res.status(400).json({ message: "Feature key required" });
+    }
 
     const feature = await FeatureModel.findOne({ key, orgId });
 
@@ -78,6 +102,7 @@ const checkFeature = async (req, res) => {
     res.status(500).json({ message: "Check failed", error: err.message });
   }
 };
+
 module.exports = {
   createFeature,
   getFeatures,

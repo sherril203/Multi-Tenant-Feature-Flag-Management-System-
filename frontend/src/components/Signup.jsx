@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const [form, setForm] = useState({
     username: "",
@@ -12,20 +13,59 @@ const Signup = () => {
     orgId: ""
   });
 
+  const [orgs, setOrgs] = useState([]);
+  const [loadingOrgs, setLoadingOrgs] = useState(true);
+
+  // ✅ Fetch organizations
+  useEffect(() => {
+    const fetchOrgs = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/getorg`);
+        const data = await res.json();
+        setOrgs(data);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load organizations");
+      } finally {
+        setLoadingOrgs(false);
+      }
+    };
+
+    fetchOrgs();
+  }, [BASE_URL]);
+
+  // ✅ Handle change (reset orgId when role changes)
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "role") {
+      setForm({ ...form, role: value, orgId: "" });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ✅ validations
+    if (!form.username || !form.email || !form.password) {
+      alert("All fields are required");
+      return;
+    }
+
+    if (!form.role) {
+      alert("Please select a role");
+      return;
+    }
+
     if ((form.role === "ADMIN" || form.role === "USER") && !form.orgId) {
-      alert("orgId is required for this role");
+      alert("Please select an organization");
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:5000/signup", {
+      const res = await fetch(`${BASE_URL}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -110,17 +150,27 @@ const Signup = () => {
           </select>
         </div>
 
-        {/* ✅ orgId field (only needed for admin/user) */}
+        {/* ✅ Organization dropdown */}
         {(form.role === "ADMIN" || form.role === "USER") && (
           <div className="mb-3">
-            <label>Organization ID</label>
-            <input
-              type="text"
+            <label>Organization</label>
+            <select
               name="orgId"
               value={form.orgId}
               onChange={handleChange}
               className="w-full border p-2 rounded"
-            />
+            >
+              <option value="">
+                {loadingOrgs ? "Loading organizations..." : "Select Organization"}
+              </option>
+
+              {!loadingOrgs &&
+                orgs.map((org) => (
+                  <option key={org._id} value={org._id}>
+                    {org.name} ({org.code})
+                  </option>
+                ))}
+            </select>
           </div>
         )}
 

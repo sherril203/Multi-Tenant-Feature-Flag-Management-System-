@@ -10,7 +10,7 @@ const featureSchema = new mongoose.Schema({
   }
 });
 
-featureSchema.index({ key: 1, orgId: 1 }, { unique: true });
+featureSchema.index({ key: 1, orgId: 1 });
 
 const featureModel = mongoose.model("FeatureFlag", featureSchema);
 

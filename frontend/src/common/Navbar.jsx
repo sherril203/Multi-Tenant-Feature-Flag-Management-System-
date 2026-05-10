@@ -14,42 +14,54 @@ const Navbar = () => {
   return (
     <nav className="flex items-center justify-between bg-gray-900 text-white px-6 py-3">
 
+      {/* LEFT */}
       <div className="text-xl font-bold">
         Tenant App
       </div>
 
+      {/* CENTER */}
       <div className="flex gap-6">
 
-        <Link to="/">Home</Link>
-        <Link to="/contact">Contact</Link>
+        {/* Dynamic Home */}
+        <Link to={
+          role === "SUPER_ADMIN" ? "/superadmin" :
+          role === "ADMIN" ? "/admin" :
+          role === "USER" ? "/user" : "/"
+        }>
+          Home
+        </Link>
+
+     
 
         {role === "SUPER_ADMIN" && (
           <>
-            <Link to="/create-org">Create Org</Link>
-            <Link to="/orgs">Organizations</Link>
+            <Link to="/superadmin/create-org">Create Org</Link>
+            <Link to="/superadmin/orgs">Organizations</Link>
           </>
         )}
 
         {role === "ADMIN" && (
           <>
-            <Link to="/features">Features</Link>
-            <Link to="/create-feature">Add Feature</Link>
+            <Link to="/admin/features">Features</Link>
+            <Link to="/admin/create-feature">Add Feature</Link>
           </>
         )}
 
         {role === "USER" && (
           <>
-            <Link to="/features">Features</Link>
+            <Link to="/user/features">Features</Link>
           </>
         )}
+           <Link to={role === "USER" ? "/user" : "/"}>Contact</Link>
       </div>
 
+      {/* RIGHT */}
       <div className="flex gap-4 items-center">
 
         {!role ? (
           <>
-            <Link to="/signup" className="border rounded p-3">Signup</Link>
-            <Link to="/login" className="border rounded p-3">Login</Link>
+            <Link to="/signup" className="border rounded px-3 py-1">Signup</Link>
+            <Link to="/login" className="border rounded px-3 py-1">Login</Link>
           </>
         ) : (
           <>

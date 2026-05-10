@@ -1,12 +1,17 @@
-import React from 'react'
-import Navbar from '../common/Navbar'
+import { useState } from "react";
+import Navbar from "../common/Navbar";
+import { Outlet } from "react-router";
 
-const User = () => {
+const User=()=> {
+
+
   return (
     <div>
-      <Navbar/>
-    </div>
-  )
-}
+      <Navbar />
+      <Outlet/>
 
+      
+    </div>
+  );
+}
 export default User
